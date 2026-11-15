@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi.js";
 import BookForm from "../components/BookForm.jsx";
+import { Link } from "react-router-dom";
 
 function Books() {
 
@@ -39,6 +40,10 @@ function Books() {
 
     return (
         <div className="books-container">
+            <div className="page-navigation">
+                <Link to="/dashboard">Dashboard</Link>
+                <Link to="/authors">Authors</Link>
+            </div>
             <h1>Library Books</h1>
             <p>Explore all available books in our library.</p>
              <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>
