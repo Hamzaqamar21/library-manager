@@ -3,15 +3,24 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import authMiddleware from "./middleware/authMiddleware.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/api/auth", authRoutes);
+
+
 
 app.get("/", (req, res) => {
   res.send("Library Manager API is running!");
+});
+
+app.get("/api/profile", authMiddleware, (req, res) => {
+  res.status(200).json({ message: "Profile fetched successfully", user: req.user });
 });
 
 const startServer = async () => {
