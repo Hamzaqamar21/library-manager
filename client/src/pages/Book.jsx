@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi.js";
+import BookForm from "../components/BookForm.jsx";
 
 function Books() {
 
@@ -40,6 +41,8 @@ function Books() {
         <div className="books-container">
             <h1>Library Books</h1>
             <p>Explore all available books in our library.</p>
+             <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>
+
             {/* Empty state */}
             {books.length === 0 ? (
                 <h3>No books available yet.</h3>
