@@ -1,5 +1,5 @@
 import express from "express";
-import {getBooks, getBookById, createBook, updateBook, deleteBook} from "../controllers/bookController.js";
+import {getBooks, getBookById, createBook, updateBook, deleteBook} from "../controllers/bookControl.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
 

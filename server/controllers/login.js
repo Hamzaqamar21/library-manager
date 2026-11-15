@@ -1,11 +1,11 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const login = async (req,res)=>{
     try{
         const {email,password} = req.body;
-    if(!name || !email || !password){
+    if(!email || !password){
         return res.status(400).json({message:"Please provide all required fields"});
     }
     const user = await User.findOne({email:email.trim().toLowerCase()});

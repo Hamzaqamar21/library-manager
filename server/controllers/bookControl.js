@@ -1,6 +1,6 @@
-import Book from "../models/Book";
-import Author from "../models/Author";
-import Borrow from "../models/Borrow";
+import Book from "../models/Book.js";
+import Author from "../models/Author.js";
+import Borrow from "../models/Borrow.js";
 import mongoose from "mongoose";
 
 
@@ -77,14 +77,21 @@ export const updateBook = async (req, res) => {
         if(updates.quantity !== undefined && (!Number.isInteger(updates.quantity) || updates.quantity < 0)){
             return res.status(400).json({message:"Invalid quantity"});
         }
-        if(updates.author !== undefined && !mongoose.Types.ObjectId.isValid(updates.author)){
-            return res.status(400).json({message:"Invalid author ID"});
+
+        if(updates.author !== undefined ){
+
+            if(!mongoose.Types.ObjectId.isValid(updates.author)){
+                return res.status(400).json({ message:"Invalid author ID"});
+            }
+
+            const authorExists = await Author.findById(updates.author);
+
+            if(!authorExists){
+                return res.status(404).json({ message:"Author not found"});
+            }
         }
-        const authorExists = await Author.findById(updates.author);
-        if(!authorExists){
-            return res.status(404).json({message:"Author not found"});
-        }
-        const book = await Book.findByIdAndUpdate(id, updates, {new:true}).populate("author", "name nationality ");
+
+        const book = await Book.findByIdAndUpdate(id, updates, {new:true, runValidators:true}).populate("author", "name nationality ");
         if(!book){
             return res.status(404).json({message:"Book not found"});
         }
@@ -106,7 +113,7 @@ export const deleteBook = async (req, res) => {
         if(!book){
             return res.status(404).json({message:"Book not found"});
         }
-        const activeBorrows = await Borrow.find({book:id, status:{$in:["borrowed","overdue"]}});
+        const activeBorrows = await Borrow.findOne({book:id, status:{$in:["borrowed","overdue"]}});
         if(activeBorrows){
             return res.status(400).json({message:"Cannot delete a book that is currently borrows"});
             
