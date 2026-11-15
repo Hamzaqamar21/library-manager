@@ -33,33 +33,41 @@ function Login() {
         }
     };
 
+
     return (
-        <div>
-            <h1>Login</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email</label>
-                    <input type="email"value={email}onChange={(e) => setEmail(e.target.value)}placeholder="Enter your email"required />
-                </div>
+        <div className="auth-container">
+            <div className="auth-card">
+                <h1>Welcome Back!</h1>
+                <p className="auth-subtitle">
+                    Login to your Library Manager account
+                </p>
+                <form className="auth-form" onSubmit={handleSubmit}>
 
-                <div>
+                    <label>Email Address</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
+
                     <label>Password</label>
-                    <input type="password" value={password}onChange={(e) => setPassword(e.target.value)}placeholder="Enter your password"required/>
-                </div>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required  />
 
-                {error && <p style={{ color: "red" }}>{error}</p>}
+                    {error && (
+                        <p className="auth-error">{error}</p>
+                    )}
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
-                </button>
+                    <button type="submit" className="auth-button" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
 
-            </form>
+                </form>
 
-            <p>
-                Don't have an account? <Link to="/signup">Signup</Link>
-            </p>
+                <p className="auth-footer">
+                    Don't have an account? <Link to="/signup">Sign Up</Link>
+                </p>
+
+            </div>
+
         </div>
     );
+
 }
 
 export default Login;

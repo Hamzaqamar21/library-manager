@@ -35,38 +35,45 @@ function Signup() {
         }
     };
 
+
     return (
-        <div>
-            <h1>Create Account</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Name</label>
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" required  />
-                </div>
+        <div className="auth-container">
+            <div className="auth-card">
+                <h1>Create Account</h1>
+                <p className="auth-subtitle">
+                    Join our Library Management System
+                </p>
+                <form className="auth-form" onSubmit={handleSubmit}>
 
-                <div>
-                    <label>Email</label>
-                    <input type="email" value={email}onChange={(e) => setEmail(e.target.value)}placeholder="Enter your email" required/>
-                </div>
+                    <label>Full Name</label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" required />
 
-                <div>
+                    <label>Email Address</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required/>
+
                     <label>Password</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" minLength={6} required />
-                </div>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" minLength={6}required />
 
-                {error && <p style={{ color: "red" }}>{error}</p>}
+                    {error && (
+                        <p className="auth-error">{error}</p>
+                    )}
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Creating account..." : "Signup"}
-                </button>
+                    <button type="submit" className="auth-button" disabled={loading} >
+                        {loading ? "Creating Account..." : "Sign Up"}
+                    </button>
 
-            </form>
+                </form>
 
-            <p>
-                Already have an account? <Link to="/login">Login</Link>
-            </p>
+                <p className="auth-footer">
+                    Already have an account? <Link to="/login">Login</Link>
+                </p>
+
+            </div>
+
         </div>
     );
+
+
 }
 
 export default Signup;
