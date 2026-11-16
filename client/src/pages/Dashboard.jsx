@@ -59,13 +59,23 @@ function Dashboard() {
           </article>
         </section>
 
-        <section className="dashboard-welcome-card">
-          <h2>Get started</h2>
-          <p>Open the books page to add, view, and manage your library collection.</p>
-          <Link className="dashboard-secondary-button" to="/books">
-            Manage books
-          </Link>
-        </section>
+        <div className="dashboard-welcome-cards">
+          <section className="dashboard-welcome-card">
+            <h2>Get started</h2>
+            <p>Open the books page to add, view, and manage your library collection.</p>
+            <Link className="dashboard-secondary-button" to="/books">
+              Manage books
+            </Link>
+          </section>
+
+          <section className="dashboard-welcome-card">
+            <h2>Manage authors</h2>
+            <p>Open the authors page to add and view the authors in your library.</p>
+            <Link className="dashboard-secondary-button" to="/authors">
+              Manage authors
+            </Link>
+          </section>
+        </div>
       </main>
 
       <footer className="dashboard-footer">
