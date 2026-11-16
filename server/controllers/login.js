@@ -4,9 +4,12 @@ import jwt from "jsonwebtoken";
 
 const login = async (req,res)=>{
     try{
-        const {email,password} = req.body;
-    if(!email || !password){
+        const {email,password,role} = req.body;
+    if(!email || !password||!role){
         return res.status(400).json({message:"Please provide all required fields"});
+    }
+    if(!["admin","student"].includes(role)){
+        return res.status(400).json({message:"Invalid role"});
     }
     const user = await User.findOne({email:email.trim().toLowerCase()});
     if(!user){
@@ -15,6 +18,9 @@ const login = async (req,res)=>{
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch){
         return res.status(401).json({message:"Invalid email or password"});
+    }
+    if(user.role !== role){
+        return res.status(403).json({message:"Access denied for this role"});
     }
     const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:process.env.JWT_EXPIRES_IN});
     res.status(200).json({message:"Login successful",token,user:{id:user._id,name:user.name,email:user.email,role:user.role }});        
