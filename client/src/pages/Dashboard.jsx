@@ -75,6 +75,14 @@ function Dashboard() {
               Manage authors
             </Link>
           </section>
+
+          <section className="dashboard-welcome-card">
+            <h2>Borrow books</h2>
+            <p>Choose an available book and enter a due date to borrow it.</p>
+            <Link className="dashboard-secondary-button" to="/borrows">
+              Borrow books
+            </Link>
+          </section>
         </div>
       </main>
 

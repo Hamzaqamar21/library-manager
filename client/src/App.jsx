@@ -5,6 +5,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Books from "./pages/Book.jsx";
+import Borrows from "./pages/Borrows.jsx";
 import Authors from "./pages/Authors.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/books" element={<Books />} />
+          <Route path="/borrows" element={<Borrows />} />
           <Route path="/authors" element={<Authors />} />
           <Route path="*" element={<NotFound />} />
 

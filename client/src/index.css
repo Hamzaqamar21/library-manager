@@ -5,6 +5,48 @@
     margin: auto;
 }
 
+.borrows-container {
+    width: min(1100px, calc(100% - 60px));
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+.borrows-container h1 {
+    margin: 22px 0 12px;
+}
+
+.borrows-container > p {
+    margin: 0;
+}
+
+.return-book-button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: #15803d;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.return-book-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.borrows-container .books-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.borrows-container .book-card {
+    min-width: 0;
+}
+
 .page-navigation {
     display: flex;
     gap: 16px;
@@ -49,6 +91,44 @@
     margin: 10px 0;
     color: #444;
     overflow-wrap: anywhere;
+}
+
+.borrow-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.borrow-form label {
+    color: #444;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.borrow-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font: inherit;
+}
+
+.borrow-form button {
+    padding: 10px;
+    border: 0;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.borrow-form button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .book-form-container {
@@ -367,7 +447,7 @@
 
 .dashboard-welcome-cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 18px;
     margin-top: 24px;
 }
@@ -410,11 +490,13 @@
 
 
 @media (max-width: 600px) {
-    .books-container {
+    .books-container,
+    .borrows-container {
         padding: 15px;
     }
 
-    .books-grid {
+    .books-grid,
+    .borrows-container .books-grid {
         grid-template-columns: 1fr;
     }
     .book-form-container {
