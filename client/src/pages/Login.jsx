@@ -24,7 +24,11 @@ function Login() {
 
             await login({ email, password,role });
 
-            navigate("/dashboard");
+            if (role === "admin") {
+                navigate("/dashboard");
+            } else {
+                navigate("/borrows");
+            }
 
         } catch (error) {
             setError(

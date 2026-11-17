@@ -3,10 +3,13 @@ import mongoose from "mongoose";
 import Author from "../models/Author.js";
 import Book from "../models/Book.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import adminMiddleware from "../middleware/adminMiddleware.js";
+
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.use(adminMiddleware);
 
 router.get("/", async (req, res) => {
     try {
