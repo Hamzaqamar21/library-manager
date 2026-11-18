@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi.js";
 import BookForm from "../components/BookForm.jsx";
@@ -6,6 +5,7 @@ import Borrow from "../components/Borrow.jsx";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import {useSearchParams} from "react-router-dom";
 
 function Books() {
     const { user, logout } = useAuth();
@@ -18,9 +18,12 @@ function Books() {
     };
 
     const [books, setBooks] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("");
-    const [availabilityFilter, setAvailabilityFilter] = useState("all");
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchTerm=searchParams.get("search") || "";
+    const categoryFilter=searchParams.get("category") || "";
+    const availabilityFilter=searchParams.get("availability") || "all";
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -45,6 +48,51 @@ function Books() {
         fetchBooks();
 
     }, []);
+
+    const handleSearchChange = (value) => {
+        setSearchParams((previous) => {
+            const params = new URLSearchParams(previous);
+
+            if (value.trim()) {
+                params.set("search", value);
+            } else {
+                params.delete("search");
+            }
+
+            return params;
+        })};
+
+    const handleCategoryChange = (value) => {
+        setSearchParams((previous) => {
+            const params = new URLSearchParams(previous);
+
+            if (value) {
+                params.set("category", value);
+            } else {
+                params.delete("category");
+            }
+
+            return params;
+        });
+    };
+
+    const handleAvailabilityChange = (value) => {
+        setSearchParams((previous) => {
+            const params = new URLSearchParams(previous);
+
+            if (value !== "all") {
+                params.set("availability", value);
+            } else {
+                params.delete("availability");
+            }
+
+            return params;
+        });
+    };
+
+
+
+
 
     const categories = [...new Set(books.map((book) => book.category).filter(Boolean))].sort();
     const normal = searchTerm.trim().toLowerCase();
@@ -102,11 +150,11 @@ function Books() {
                 <div className="book-filters">
                     <label>
                         Search books
-                        <input type="search"value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by title, author, or category" />
+                        <input type="search"value={searchTerm} onChange={(event) => handleSearchChange(event.target.value)} placeholder="Search by title, author, or category" />
                     </label>
                     <label>
                         Category
-                        <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} >
+                        <select value={categoryFilter} onChange={(event) => handleCategoryChange(event.target.value)} >
                             <option value="">All categories</option>
                             {categories.map((category) => (
                                 <option key={category} value={category}>{category}</option>
@@ -115,7 +163,7 @@ function Books() {
                     </label>
                     <label>
                         Availability
-                        <select value={availabilityFilter} onChange={(event) => setAvailabilityFilter(event.target.value)} >
+                        <select value={availabilityFilter} onChange={(event) => handleAvailabilityChange(event.target.value)} >
                             <option value="all">All books</option>
                             <option value="available">Available</option>
                             <option value="out-of-stock">Out of stock</option>
