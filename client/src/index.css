@@ -147,7 +147,8 @@
 }
 
 .book-form-container input,
-.book-form-container textarea {
+.book-form-container textarea,
+.book-form-container select {
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 6px;

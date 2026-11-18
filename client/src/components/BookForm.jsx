@@ -1,18 +1,40 @@
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { createBook } from "../api/bookApi.js";
+import {getAuthors} from "../api/authorApi.js";
+
 
 function BookForm({ onBookCreated }) {
+
+    const [authors, setAuthors] = useState([]);
+    const [loadingAuthors, setLoadingAuthors] = useState(true);
+    const [errorAuthors, setErrorAuthors] = useState("");
 
     const [formData, setFormData] = useState({title: "", author: "",category: "", description: "", quantity: "", publishedYear: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    useEffect(() => {
+        const fetchAuthors = async () => {
+            try{
+                const data = await getAuthors();
+                setAuthors(data.authors||[]);
+            }catch(error){
+                setErrorAuthors(error.response?.data?.message || "Failed to load authors");
+            }finally{
+                setLoadingAuthors(false);
+            }
+        };
+
+        fetchAuthors();
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        setFormData({...formData, [name]: value });
+        // setFormData({...formData, [name]: value });
+        setFormData((previous) => ({ ...previous, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -47,8 +69,21 @@ function BookForm({ onBookCreated }) {
                 <label>Book Title</label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Enter book title" required />
 
-                <label>Author ID</label>
-                <input type="text" name="author" value={formData.author} onChange={handleChange} placeholder="Enter existing Author MongoDB ID" required />
+                <label>Author</label>
+                <select name="author" value={formData.author} onChange={handleChange} disabled={loadingAuthors || authors.length === 0} placeholder="Enter existing Author MongoDB ID" required >
+                    <option value="" >
+                        {loadingAuthors ? "Loading authors..." : (authors.length === 0 ? "No authors available" : "Select an author")}
+                    </option>
+                    {authors.map((author) => (
+                        <option key={author._id} value={author._id}>
+                            {author.name}
+                        </option>
+                    ))}
+                </select>           
+                    
+                {errorAuthors && <p style={{ color: "red" }}>{errorAuthors}</p>}
+                {!loadingAuthors && !errorAuthors && authors.length === 0 && <p style={{ color: "red" }}>No authors available. Please add an author first.</p>}
+
 
                 <label>Category</label>
                 <input type="text" name="category" value={formData.category} onChange={handleChange} placeholder="Enter category" required  />
