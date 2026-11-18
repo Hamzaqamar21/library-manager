@@ -24,6 +24,8 @@ function Books() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [showBookForm, setShowBookForm] = useState(false);
+
     useEffect(() => {
 
         const fetchBooks = async () => {
@@ -71,25 +73,40 @@ function Books() {
             </div>
             <h1>Library Books</h1>
             <p>Explore all available books in our library.</p>
-             {isAdmin && <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>}
+             {/* {isAdmin && <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>} */}
+
+            {isAdmin && (
+                    <div className="add-book-section">
+                        <button className="add-book-button" onClick={() => setShowBookForm(true)} >
+                            + Add New Book
+                        </button>
+                    </div>
+            )}
+
+            {showBookForm && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <button className="modal-close" onClick={() => setShowBookForm(false)} >
+                            &times;
+                         </button>
+
+                         <BookForm onBookCreated={(newBook) => {
+                                    setBooks((previousBooks) => [newBook, ...previousBooks]);
+                                    setShowBookForm(false);}}
+                            />
+                        </div>
+                    </div>
+                )}
 
             {books.length > 0 && (
                 <div className="book-filters">
                     <label>
                         Search books
-                        <input
-                            type="search"
-                            value={searchTerm}
-                            onChange={(event) => setSearchTerm(event.target.value)}
-                            placeholder="Search by title, author, or category"
-                        />
+                        <input type="search"value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by title, author, or category" />
                     </label>
                     <label>
                         Category
-                        <select
-                            value={categoryFilter}
-                            onChange={(event) => setCategoryFilter(event.target.value)}
-                        >
+                        <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} >
                             <option value="">All categories</option>
                             {categories.map((category) => (
                                 <option key={category} value={category}>{category}</option>
@@ -98,10 +115,7 @@ function Books() {
                     </label>
                     <label>
                         Availability
-                        <select
-                            value={availabilityFilter}
-                            onChange={(event) => setAvailabilityFilter(event.target.value)}
-                        >
+                        <select value={availabilityFilter} onChange={(event) => setAvailabilityFilter(event.target.value)} >
                             <option value="all">All books</option>
                             <option value="available">Available</option>
                             <option value="out-of-stock">Out of stock</option>
