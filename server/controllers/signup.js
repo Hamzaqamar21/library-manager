@@ -4,22 +4,10 @@ import jwt from "jsonwebtoken";
 
 const signup = async (req, res) => {
    try {
-    const { name, email, password, role, adminCode } = req.body;
+    const { name, email, password } = req.body;
     if(!name || !email || !password){
         return res.status(400).json({message:"Please provide all required fields"});
     }
-    if (!["admin", "student"].includes(role)) {
-    return res.status(400).json({
-        message: "Invalid role"
-    });
-    }
-
-    if (role === "admin" && adminCode !== process.env.ADMIN_SIGNUP_CODE) {
-        return res.status(403).json({
-            message: "Invalid admin registration code"
-        });
-    }
-
     if(password.length < 6){
         return res.status(400).json({message:"Password must be at least 6 characters long"});
     }
@@ -30,7 +18,12 @@ const signup = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({name,email:email.trim().toLowerCase(),password:hashedPassword, role:role});
+    const user = await User.create({
+        name,
+        email: email.trim().toLowerCase(),
+        password: hashedPassword,
+        role: "student"
+    });
     const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:process.env.JWT_EXPIRES_IN});
 
     res.status(201).json({message:"Signup successful",token,user:{id:user._id,name:user.name,email:user.email,role:user.role }});

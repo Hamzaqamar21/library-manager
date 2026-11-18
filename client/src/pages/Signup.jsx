@@ -11,9 +11,6 @@ function Signup() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("student");
-    const [adminCode, setAdminCode] = useState("");
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -24,13 +21,8 @@ function Signup() {
             setLoading(true);
             setError("");
 
-            const data = await signup({ name, email, password, role, adminCode });
-
-            if (data.user.role === "admin") {
-                navigate("/dashboard");
-            } else {
-                navigate("/borrows");
-            }
+            const data = await signup({ name, email, password });
+            navigate(data.user.role === "admin" ? "/dashboard" : "/books");
 
         } catch (error) {
             setError(
@@ -60,21 +52,6 @@ function Signup() {
                     <label>Password</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" minLength={6}required />
 
-
-                    <label>Sign Up As</label>
-                    <select value={role}onChange={(e) => {setRole(e.target.value); setAdminCode("");}}>
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
-                    </select>
-
-
-
-                    {role === "admin" && (
-                        <>
-                            <label>Admin Registration Code</label>
-                            <input type="password" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} placeholder="Enter admin registration code" required />
-                        </>
-                    )}
                     {error && (
                         <p className="auth-error">{error}</p>
                     )}

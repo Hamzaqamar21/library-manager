@@ -5,7 +5,6 @@ const API = axios.create({
   headers: {"Content-Type": "application/json",},
 });
 
-
 API.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -17,6 +16,5 @@ API.interceptors.request.use((config) => {
     return Promise.reject(error);
     }
 );
-
 
 export default API;

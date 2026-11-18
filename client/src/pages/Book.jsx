@@ -4,8 +4,18 @@ import { getBooks } from "../api/bookApi.js";
 import BookForm from "../components/BookForm.jsx";
 import Borrow from "../components/Borrow.jsx";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 function Books() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const isAdmin = user?.role === "admin";
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
 
     const [books, setBooks] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -55,12 +65,13 @@ function Books() {
     return (
         <div className="books-container">
             <div className="page-navigation">
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/authors">Authors</Link>
+                {isAdmin && <Link to="/dashboard">Dashboard</Link>}
+                {isAdmin && <Link to="/authors">Authors</Link>}
+                <button type="button" onClick={handleLogout}>Logout</button>
             </div>
             <h1>Library Books</h1>
             <p>Explore all available books in our library.</p>
-             <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>
+             {isAdmin && <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>}
 
             {books.length > 0 && (
                 <div className="book-filters">
@@ -131,7 +142,7 @@ function Books() {
                                 <strong>Status:</strong>{" "}
                                 {book.quantity > 0 ? "Available" : "Out of stock"}
                             </p>
-                            {book.quantity > 0 && (
+                            {isAdmin && book.quantity > 0 && (
                                 <Borrow
                                     book={book}
                                     onBorrowed={(bookId) => {

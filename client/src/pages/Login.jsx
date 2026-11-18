@@ -13,8 +13,6 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const [role, setRole] = useState("student");
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -22,12 +20,12 @@ function Login() {
             setLoading(true);
             setError("");
 
-            await login({ email, password,role });
+            const data = await login({ email, password });
 
-            if (role === "admin") {
+            if (data.user.role === "admin") {
                 navigate("/dashboard");
             } else {
-                navigate("/borrows");
+                navigate("/books");
             }
 
         } catch (error) {
@@ -48,16 +46,6 @@ function Login() {
                     Login to your Library Manager account
                 </p>
                 <form className="auth-form" onSubmit={handleSubmit}>
-
-                    <label>Login As</label>
-                    <select
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                    >
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
-                    </select>
-
 
                     <label>Email Address</label>
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
