@@ -187,8 +187,45 @@
     color: #15803d;
 }
 
+.book-filters input,
+.book-filters select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    box-sizing: border-box;
+    background-color: white;
+    color: #333;
+    outline: none;
+}
+.book-filters input:focus,
+.book-filters select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.book-filters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 25px 0;
+}
 
+.book-filters label {
+    display: flex;
+    flex-direction: column;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
 
+@media (max-width: 768px) {
+    .book-filters {
+        grid-template-columns: 1fr;
+    }
+}
 .auth-container {
     min-height: 100vh;
     display: flex;
