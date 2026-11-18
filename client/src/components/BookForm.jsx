@@ -40,6 +40,12 @@ function BookForm({ onBookCreated }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (formData.quantity === "" || Number(formData.quantity) < 0 ||
+            !Number.isInteger(Number(formData.quantity))) {
+            setError("Quantity cannot be negative. Please enter a valid whole number.");
+            return;
+        }
+
         try {
             setLoading(true);
             setError("");
@@ -92,7 +98,10 @@ function BookForm({ onBookCreated }) {
                 <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Enter book description" />
 
                 <label>Quantity</label>
-                <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} min="0" required  />
+                <input type="text" inputMode = "numeric"name="quantity" value={formData.quantity} 
+                onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {handleChange(e);}}} required/>
 
                 <label>Published Year</label>
                 <input type="number" name="publishedYear" value={formData.publishedYear} onChange={handleChange} min="1000" max="9999" placeholder="Example: 2020" />
