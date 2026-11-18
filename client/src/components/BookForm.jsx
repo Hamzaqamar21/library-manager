@@ -46,6 +46,12 @@ function BookForm({ onBookCreated }) {
             return;
         }
 
+        const currentYear = new Date().getFullYear();
+        if (formData.publishedYear && Number(formData.publishedYear) > currentYear) {
+            setError(`Published year must be between 1000 and ${currentYear}.`);
+            return;
+        }
+
         try {
             setLoading(true);
             setError("");
@@ -104,7 +110,7 @@ function BookForm({ onBookCreated }) {
                     if (/^\d*$/.test(value)) {handleChange(e);}}} required/>
 
                 <label>Published Year</label>
-                <input type="number" name="publishedYear" value={formData.publishedYear} onChange={handleChange} min="1000" max="9999" placeholder="Example: 2020" />
+                <input type="number" name="publishedYear" value={formData.publishedYear} onChange={handleChange} min="1000" max={new Date().getFullYear()} placeholder="Example: 2020" />
 
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 {success && <p style={{ color: "green" }}>{success}</p>}
