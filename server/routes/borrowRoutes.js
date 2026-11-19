@@ -4,20 +4,50 @@ import Borrow from "../models/Borrow.js";
 import Book from "../models/Book.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import adminMiddleware from "../middleware/adminMiddleware.js";
+import User from "../models/User.js";
 
 const router = express.Router();
 
 router.use(authMiddleware);
-router.use(adminMiddleware);
 
 router.get("/", async (req, res) => {
     try {
-        const borrows = await Borrow.find({ user: req.user._id }).populate("book", "title category") .sort({ createdAt: -1 });
+        let filter = {};
 
-        res.status(200).json({message: "Borrowing records fetched successfully",borrows});
+        if (req.user.role !== "admin") {
+            filter.user = req.user._id;
+        }
+
+        if (req.query.student?.trim()) {
+            const searchStudent = req.query.student.trim();
+            const student = await User.find({$or: [{name: { $regex: req.query.student, $options: "i" }}, {email: { $regex: req.query.student, $options: "i" }}]}).select("_id");
+            filter.user = { $in: student.map(user => user._id) };
+        }
+
+        if (req.query.book?.trim()) {
+            const searchBook = req.query.book.trim();
+            const books = await Book.find({title: { $regex: req.query.book, $options: "i" } }).select("_id");
+            filter.book = { $in: books.map(books => books._id) };
+        }
+
+        if (req.query.from || req.query.to) {
+            filter.borrowDate = {};
+            if (req.query.from) {
+                filter.borrowDate.$gte = new Date(req.query.from);
+            }
+
+            if (req.query.to) {
+                const endDate = new Date(req.query.to);
+                endDate.setHours(23, 59, 59, 999);
+                filter.borrowDate.$lte = endDate;
+            }
+        }
+
+        const borrows = await Borrow.find(filter).populate("user", "name email").populate("book", "title category").sort({ createdAt: -1 });
+
+        res.status(200).json({ message: "Borrowing records fetched successfully", borrows  });
     } catch (error) {
-        console.error("Get borrows error:", error);
-        res.status(500).json({ message: "Server error" });
+        console.error("Get borrows error:", error); res.status(500).json({ message: "Server error" });
     }
 });
 

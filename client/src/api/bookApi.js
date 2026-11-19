@@ -1,7 +1,7 @@
 import API from "./client.js";
 
-export const getBooks = async () => {
-    const response = await API.get("/books");
+export const getBooks = async (filters={}) => {
+    const response = await API.get("/books", { params: filters });
     return response.data;
 }
 

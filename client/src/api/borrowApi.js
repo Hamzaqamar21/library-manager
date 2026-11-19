@@ -1,7 +1,7 @@
 import API from "./client.js";
 
-export const getBorrows = async () => {
-    const response = await API.get("/borrows");
+export const getBorrows = async (filters={}) => {
+    const response = await API.get("/borrows", { params: filters });
     return response.data;
 };
 
