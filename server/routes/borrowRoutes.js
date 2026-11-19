@@ -43,9 +43,25 @@ router.get("/", async (req, res) => {
             }
         }
 
-        const borrows = await Borrow.find(filter).populate("user", "name email").populate("book", "title category").sort({ createdAt: -1 });
+        const hasPagination = req.query.page !== undefined;
+        const requestedPage = Number(req.query.page);
+        const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+        const totalBorrows = await Borrow.countDocuments(filter);
+        const borrowQuery = Borrow.find(filter).populate("user", "name email").populate("book", "title category") .sort({ createdAt: -1 });
+        if (hasPagination) {
+            borrowQuery.skip(skip).limit(limit);
+        }
+        const borrows = await borrowQuery;
 
-        res.status(200).json({ message: "Borrowing records fetched successfully", borrows  });
+        res.status(200).json({
+            message: "Borrowing records fetched successfully",
+            borrows,
+            currentPage: page,
+            totalPages: hasPagination ? Math.ceil(totalBorrows / limit) : 1,
+            totalBorrows,
+        });
     } catch (error) {
         console.error("Get borrows error:", error); res.status(500).json({ message: "Server error" });
     }

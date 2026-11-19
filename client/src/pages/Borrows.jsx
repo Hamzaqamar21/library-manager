@@ -10,6 +10,8 @@ function Borrows() {
     const [error, setError] = useState("");
     const [borrows, setBorrows] = useState([]);
     const [returningId, setReturningId] = useState("");
+    const [bookPage, setBookPage] = useState(1);
+    const [bookTotalPages, setBookTotalPages] = useState(1);
 
     const [showHistory, setShowHistory] = useState(false);
     const [historyFilter, setHistoryFilter] = useState({ student: "", book: "", from: "", to: "" });
@@ -17,12 +19,18 @@ function Borrows() {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyError, setHistoryError] = useState("");
     const [historySearched, setHistorySearched] = useState(false);
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyTotalPages, setHistoryTotalPages] = useState(1);
 
     useEffect(() => {
         const fetchBooks = async () => {
             try {
-                const [booksData, borrowsData] = await Promise.all([getBooks(), getBorrows()]);
+                const [booksData, borrowsData] = await Promise.all([
+                    getBooks({ page: bookPage }),
+                    getBorrows(),
+                ]);
                 setBooks(booksData.books || []);
+                setBookTotalPages(booksData.totalPages || 1);
                 setBorrows(borrowsData.borrows || []);
             } catch (requestError) {
                 setError(requestError.response?.data?.message || "Failed to load books");
@@ -32,7 +40,7 @@ function Borrows() {
         };
 
         fetchBooks();
-    }, []);
+    }, [bookPage]);
 
     const handleBorrowed = (bookId, borrow) => {
         setBooks((previousBooks) =>
@@ -68,7 +76,7 @@ function Borrows() {
         }
     };
     
-    const handleHistorySearch = async (event) => {
+    const handleHistorySearch = async (event, page = historyPage) => {
         event.preventDefault();
         setHistoryError("");
         if(historyFilter.from && historyFilter.to && historyFilter.from > historyFilter.to){
@@ -77,8 +85,9 @@ function Borrows() {
         }
         try{
             setHistoryLoading(true);
-            const data = await getBorrows(historyFilter);
+            const data = await getBorrows({ ...historyFilter, page });
             setHistoryRecords(data.borrows || []);
+            setHistoryTotalPages(data.totalPages || 1);
             setHistorySearched(true);
         } catch (error) {
             setHistoryError(error.response?.data?.message || "Failed to fetch history");
@@ -90,6 +99,11 @@ function Borrows() {
     const handleHistoryFilterChange = (event) => {
         const { name, value } = event.target;
         setHistoryFilter((previous) => ({ ...previous, [name]: value }));
+    };
+
+    const handleHistoryPageChange = (page) => {
+        setHistoryPage(page);
+        handleHistorySearch({ preventDefault: () => {} }, page);
     };
 
     if (loading) {
@@ -154,6 +168,26 @@ function Borrows() {
                 </div>
             )}
 
+            {bookTotalPages > 1 && (
+                <div className="pagination">
+                    <button
+                        type="button"
+                        onClick={() => setBookPage((previous) => previous - 1)}
+                        disabled={bookPage === 1}
+                    >
+                        Previous
+                    </button>
+                    <span>Page {bookPage} of {bookTotalPages}</span>
+                    <button
+                        type="button"
+                        onClick={() => setBookPage((previous) => previous + 1)}
+                        disabled={bookPage === bookTotalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+
 
             {showHistory && (
                 <div className="history-overlay">
@@ -165,7 +199,10 @@ function Borrows() {
                         <h2>Borrowing History</h2>
                         <p>Search and view your borrowing history</p>
 
-                        <form onSubmit={handleHistorySearch}>
+                        <form onSubmit={(event) => {
+                            setHistoryPage(1);
+                            handleHistorySearch(event, 1);
+                        }}>
                             <label> Student Name Or Email</label>
                             <input type="text" name="student" value={historyFilter.student} onChange={handleHistoryFilterChange} placeholder="Enter student name or email" />
                             <label> Book Name </label>
@@ -246,6 +283,25 @@ function Borrows() {
 
                                     </div>
                             )}
+                                {historyTotalPages > 1 && (
+                                    <div className="pagination">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHistoryPageChange(historyPage - 1)}
+                                            disabled={historyPage === 1 || historyLoading}
+                                        >
+                                            Previous
+                                        </button>
+                                        <span>Page {historyPage} of {historyTotalPages}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHistoryPageChange(historyPage + 1)}
+                                            disabled={historyPage === historyTotalPages || historyLoading}
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
