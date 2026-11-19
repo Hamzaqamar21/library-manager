@@ -1,7 +1,7 @@
 import API from "./client.js";
 
-export const getAuthors = async () => {
-    const response = await API.get("/authors");
+export const getAuthors = async (params = {}) => {
+    const response = await API.get("/authors", { params });
     return response.data;
 };
 

@@ -19,6 +19,11 @@ function Books() {
 
     const [books, setBooks] = useState([]);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [categories, setCategories] = useState([]);
+
+
     const [searchParams, setSearchParams] = useSearchParams();
     const searchTerm=searchParams.get("search") || "";
     const categoryFilter=searchParams.get("category") || "";
@@ -29,14 +34,17 @@ function Books() {
 
     const [showBookForm, setShowBookForm] = useState(false);
 
+
     useEffect(() => {
 
         const fetchBooks = async () => {
             try {
                 setLoading(true);
                 setError("");
-                const data = await getBooks();
-                setBooks(data.books);
+                const data = await getBooks({page:currentPage, search: searchTerm, category: categoryFilter, availability: availabilityFilter});
+                setBooks(data.books || []);
+                setTotalPages(data.totalPages||1);
+                setCategories(data.categories||[]);
 
             } catch (error) {
                 setError( error.response?.data?.message || "Failed to load books"  );
@@ -47,9 +55,10 @@ function Books() {
 
         fetchBooks();
 
-    }, []);
+    }, [currentPage, searchTerm, categoryFilter, availabilityFilter]);
 
     const handleSearchChange = (value) => {
+        setCurrentPage(1);
         setSearchParams((previous) => {
             const params = new URLSearchParams(previous);
 
@@ -63,6 +72,7 @@ function Books() {
         })};
 
     const handleCategoryChange = (value) => {
+        setCurrentPage(1);
         setSearchParams((previous) => {
             const params = new URLSearchParams(previous);
 
@@ -77,6 +87,7 @@ function Books() {
     };
 
     const handleAvailabilityChange = (value) => {
+        setCurrentPage(1);
         setSearchParams((previous) => {
             const params = new URLSearchParams(previous);
 
@@ -94,7 +105,7 @@ function Books() {
 
 
 
-    const categories = [...new Set(books.map((book) => book.category).filter(Boolean))].sort();
+    // const categories = [...new Set(books.map((book) => book.category).filter(Boolean))].sort();
     const normal = searchTerm.trim().toLowerCase();
     const filteredBooks = books.filter((book) => {
     const matchesSearch = !normal  || [book.title, book.category, book.author?.name] .some((value) => value?.toLowerCase().includes(normal));
@@ -224,6 +235,23 @@ function Books() {
 
                 </div>
 
+            )}
+
+
+
+
+
+
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage} of {totalPages}</span>
+                    <button onClick={() => setCurrentPage(prev => prev + 1, totalPages)} disabled={currentPage === totalPages}>
+                        Next
+                    </button>
+                </div>
             )}
 
         </div>

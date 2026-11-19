@@ -13,9 +13,18 @@ router.use(adminMiddleware);
 
 router.get("/", async (req, res) => {
     try {
-        const authors = await Author.find().sort({ createdAt: -1 });
+        // const authors = await Author.find().sort({ createdAt: -1 });
 
-        res.status(200).json({message: "Authors fetched successfully",authors});
+        const requestedPage = Number(req.query.page);
+        const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+        const limit = 8;
+        const skip = (page - 1) * limit;
+        const totalAuthors = await Author.countDocuments();
+        const authors = await Author.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+        res.status(200).json({
+            message: "Authors fetched successfully",authors, currentPage: page, totalPages: Math.ceil(totalAuthors / limit), totalAuthors
+        });
     } catch (error) {
         console.error("Get authors error:", error);
         res.status(500).json({ message: "Server error" });

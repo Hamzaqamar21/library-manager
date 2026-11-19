@@ -8,13 +8,20 @@ function Authors() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
     const [showAuthorForm, setShowAuthorForm] = useState(false);
 
     useEffect(() => {
         const fetchAuthors = async () => {
             try {
-                const data = await getAuthors();
+                // const data = await getAuthors();
+                setLoading(true);
+                const data = await getAuthors({ page: currentPage });
+
                 setAuthors(data.authors);
+                setTotalPages(data.totalPages);
             } catch (requestError) {
                 setError(requestError.response?.data?.message || "Failed to load authors");
             } finally {
@@ -23,7 +30,7 @@ function Authors() {
         };
 
         fetchAuthors();
-    }, []);
+    }, [currentPage]);
 
     return (
         <div className="books-container">
@@ -75,6 +82,25 @@ function Authors() {
                     ))}
                 </div>
             )}
+
+
+
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button onClick={() => setCurrentPage(prev => prev - 1, )} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage} of {totalPages}</span>
+                    <button onClick={() => setCurrentPage(prev => prev + 1, totalPages)} disabled={currentPage === totalPages}>
+                        Next
+                    </button>
+                </div>
+            )}
+
+
+
+
+
         </div>
     );
 }

@@ -4,10 +4,54 @@ import Borrow from "../models/Borrow.js";
 import mongoose from "mongoose";
 
 
+// export const getBooks = async (req, res) => {
+//     try{
+//         const books = await Book.find().populate("author", "name nationality ").sort({createdAt:-1});
+//         res.status(200).json({message:"Books fetched successfully",books});
+//     }catch (error) {
+//         console.error("Get books error:", error.message);
+//         res.status(500).json({message:"Server error"});
+//     }
+// };
+
+
 export const getBooks = async (req, res) => {
-    try{
-        const books = await Book.find().populate("author", "name nationality ").sort({createdAt:-1});
-        res.status(200).json({message:"Books fetched successfully",books});
+    try {
+        const requestedPage = Number(req.query.page);
+        const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+        const limit=12;
+        const skip = (page - 1) * limit;
+
+        const filter = {};
+
+        if (req.query.search?.trim()) {
+            const search = req.query.search.trim();
+            const authors = await Author.find({name: { $regex: search, $options: "i" } }).select("_id");
+            filter.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
+                {author: { $in: authors.map(author => author._id) } }
+            ];
+        }
+
+        if (req.query.category?.trim()) {
+            filter.category = req.query.category.trim();
+        }
+
+        if(req.query.availability === "available"){
+            filter.quantity = { $gt: 0 };
+        }else if(req.query.availability === "out-of-stock"){
+            filter.quantity = { $eq: 0 };
+        }
+
+        const totalBooks=await Book.countDocuments(filter);
+        const books = await Book.find(filter).populate("author", "name nationality ").sort({createdAt:-1}).skip(skip).limit(limit);
+
+        const categories= await Book.distinct("category");
+
+        res.status(200).json({
+            message: "Books fetched successfully",books, currentPage: page, totalPages: Math.ceil(totalBooks / limit), totalBooks, categories
+        });
     }catch (error) {
         console.error("Get books error:", error.message);
         res.status(500).json({message:"Server error"});
