@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { getBooks } from "../api/bookApi.js";
 import { getBorrows, returnBook } from "../api/borrowApi.js";
 import Borrow from "../components/Borrow.jsx";
+import Navbar from "../components/Navbar.jsx";
 
 function Borrows() {
     const [books, setBooks] = useState([]);
@@ -107,20 +107,17 @@ function Borrows() {
     };
 
     if (loading) {
-        return <h2>Loading books...</h2>;
+        return <div className="library-page"><Navbar /><main className="borrows-container"><h2>Loading books...</h2></main></div>;
     }
 
     if (error) {
-        return <h2 className="form-error">{error}</h2>;
+        return <div className="library-page"><Navbar /><main className="borrows-container"><h2 className="form-error">{error}</h2></main></div>;
     }
 
     return (
-        <div className="borrows-container">
-            <div className="page-navigation">
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/books">Manage books</Link>
-                <Link to="/authors">Authors</Link>
-            </div>
+        <div className="library-page">
+            <Navbar />
+            <main className="borrows-container">
             <h1>Borrow books</h1>
             <p>Select a book and enter its due date to borrow it.</p>
 
@@ -309,10 +306,7 @@ function Borrows() {
                     </div>
                 </div>
             )}
-
-
-
-
+            </main>
         </div>
     );
 }

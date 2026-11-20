@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { getAuthors } from "../api/authorApi.js";
 import AuthorForm from "../components/AuthorForm.jsx";
+import Navbar from "../components/Navbar.jsx";
 
 function Authors() {
     const [authors, setAuthors] = useState([]);
@@ -33,11 +33,9 @@ function Authors() {
     }, [currentPage]);
 
     return (
-        <div className="books-container">
-            <div className="page-navigation">
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/books">Books</Link>
-            </div>
+        <div className="library-page">
+            <Navbar />
+            <main className="books-container">
             <h1>Library Authors</h1>
             <p>Add and view the authors in your library.</p>
             {/* <AuthorForm onAuthorCreated={(newAuthor) => setAuthors((previous) => [newAuthor, ...previous])} /> */}
@@ -97,10 +95,7 @@ function Authors() {
                 </div>
             )}
 
-
-
-
-
+            </main>
         </div>
     );
 }

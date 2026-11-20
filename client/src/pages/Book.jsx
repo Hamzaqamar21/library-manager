@@ -1,21 +1,14 @@
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi.js";
 import BookForm from "../components/BookForm.jsx";
-import Borrow from "../components/Borrow.jsx";
-import { Link } from "react-router-dom";
+import Borrow from "../components/Borrow.jsx";same 
 import { useAuth } from "../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
 import {useSearchParams} from "react-router-dom";
+import Navbar from "../components/Navbar.jsx";
 
 function Books() {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const { user } = useAuth();
     const isAdmin = user?.role === "admin";
-
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
 
     const [books, setBooks] = useState([]);
 
@@ -116,20 +109,17 @@ function Books() {
     });
 
     if (loading) {
-        return <h2>Loading books...</h2>;
+        return <div className="library-page"><Navbar /><main className="books-container"><h2>Loading books...</h2></main></div>;
     }
 
     if (error) {
-        return <h2 style={{ color: "red" }}>{error}</h2>;
+        return <div className="library-page"><Navbar /><main className="books-container"><h2 style={{ color: "red" }}>{error}</h2></main></div>;
     }
 
     return (
-        <div className="books-container">
-            <div className="page-navigation">
-                {isAdmin && <Link to="/dashboard">Dashboard</Link>}
-                {isAdmin && <Link to="/authors">Authors</Link>}
-                <button type="button" onClick={handleLogout}>Logout</button>
-            </div>
+        <div className="library-page">
+            <Navbar />
+            <main className="books-container">
             <h1>Library Books</h1>
             <p>Explore all available books in our library.</p>
              {/* {isAdmin && <BookForm onBookCreated={(newBook) => { setBooks((prevBooks) => [newBook, ...prevBooks]); }}/>} */}
@@ -232,7 +222,6 @@ function Books() {
                         </div>
 
                     ))}
-
                 </div>
 
             )}
@@ -254,6 +243,7 @@ function Books() {
                 </div>
             )}
 
+            </main>
         </div>
     );
 }

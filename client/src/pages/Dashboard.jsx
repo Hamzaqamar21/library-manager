@@ -1,37 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import Navbar from "../components/Navbar.jsx";
 
 function Dashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const { user } = useAuth();
 
   return (
     <div className="dashboard-page">
-      <header className="dashboard-navbar">
-        <Link className="dashboard-brand" to="/dashboard">
-          <span>Library Manager</span>
-        </Link>
-
-        <nav className="dashboard-nav-links" aria-label="Main navigation">
-          <Link className="dashboard-nav-link active" to="/dashboard">
-            Dashboard
-          </Link>
-          <Link className="dashboard-nav-link" to="/books">
-            Books
-          </Link>
-          <Link className="dashboard-nav-link" to="/authors">
-            Authors
-          </Link>
-          <button className="dashboard-logout-button" type="button" onClick={handleLogout}>
-            Logout
-          </button>
-        </nav>
-      </header>
+      <Navbar />
 
       <main className="dashboard-main">
         <section className="dashboard-hero">
