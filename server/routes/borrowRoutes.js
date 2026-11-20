@@ -18,9 +18,9 @@ router.get("/", async (req, res) => {
             filter.user = req.user._id;
         }
 
-        if (req.query.student?.trim()) {
+        if (req.query.student?.trim()&& req.user.role === "admin") {
             const searchStudent = req.query.student.trim();
-            const student = await User.find({$or: [{name: { $regex: req.query.student, $options: "i" }}, {email: { $regex: req.query.student, $options: "i" }}]}).select("_id");
+            const student = await User.find({role: "student", $or: [{name: { $regex: req.query.student, $options: "i" }}, {email: { $regex: req.query.student, $options: "i" }}]}).select("_id");
             filter.user = { $in: student.map(user => user._id) };
         }
 
@@ -75,7 +75,7 @@ router.get("/:id", async (req, res) => {
             return res.status(400).json({ message: "Invalid borrow ID" });
         }
 
-        const borrow = await Borrow.findOne({_id: id,user: req.user._id}).populate("book", "title category");
+        const borrow = req.user.role === "admin" ? await Borrow.findById(id).populate("user", "name email").populate("book", "title category") : await Borrow.findOne({_id: id,user: req.user._id}).populate("user", "name email").populate("book", "title category");
 
         if (!borrow) {
             return res.status(404).json({ message: "Borrow record not found" });
@@ -90,11 +90,11 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
     try {
-        const { book, dueDate } = req.body;
+        const { book, dueDate ,name,email} = req.body;
 
-        if (!book || !dueDate) {
+        if (!book || !dueDate||!email?.trim()||!name?.trim()) {
             return res.status(400).json({
-                message: "Book and due date are required"
+                message: "Book ,name , email and due date are required"
             });
         }
 
@@ -108,6 +108,20 @@ router.post("/", async (req, res) => {
             return res.status(400).json({ message: "Please provide a valid future due date" });
         }
 
+        let borrower;
+        if(req.user.role === "admin") {
+            borrower = await User.findOne({ email:email.trim().toLowerCase() ,role:"student"});
+            if (!borrower) {
+                return res.status(404).json({ message: "Student not found" });
+            }
+
+        }else {borrower = req.user;}
+
+        if(borrower.name.trim().toLowerCase() !== name.trim().toLowerCase()){
+                return res.status(400).json({ message: "Name does not match the email provided" });
+        }
+        
+
         const bookExists = await Book.findById(book);
 
         if (!bookExists) {
@@ -118,18 +132,18 @@ router.post("/", async (req, res) => {
             return res.status(400).json({ message: "Book is not available" });
         }
 
-        const existingBorrow = await Borrow.findOne({user: req.user._id,book,status: { $in: ["borrowed", "overdue"] } });
+        const existingBorrow = await Borrow.findOne({user: borrower._id,book,status: { $in: ["borrowed", "overdue"] } });
 
         if (existingBorrow) {
             return res.status(400).json({message: "You already have this book borrowed"  });
         }
 
-        const borrow = await Borrow.create({user: req.user._id,book,dueDate: parsedDueDate  });
+        const borrow = await Borrow.create({user: borrower._id,book,dueDate: parsedDueDate  });
 
         bookExists.quantity -= 1;
         await bookExists.save();
 
-        const populatedBorrow = await Borrow.findById(borrow._id)  .populate("book", "title category");
+        const populatedBorrow = await Borrow.findById(borrow._id).populate("user", "name email").populate("book", "title category");
 
         res.status(201).json({message: "Book borrowed successfully",borrow: populatedBorrow});
     } catch (error) {
@@ -146,7 +160,8 @@ router.patch("/:id/return", async (req, res) => {
             return res.status(400).json({ message: "Invalid borrow ID" });
         }
 
-        const borrow = await Borrow.findOne({_id: id,user: req.user._id});
+        // const borrow = await Borrow.findOne({_id: id,user: req.user._id});
+        const borrow = req.user.role === "admin" ? await Borrow.findById(id) : await Borrow.findOne({_id: id,user: req.user._id});
 
         if (!borrow) {
             return res.status(404).json({ message: "Borrow record not found" });

@@ -866,6 +866,223 @@
 
 
 
+/* Borrow button */
+
+.borrow-open-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 9px;
+    background: #2563eb;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.borrow-open-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+.borrow-open-button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Modal overlay */
+
+.borrow-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2000;
+}
+
+/* Modal */
+
+.borrow-modal {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    animation: borrowModalShow 0.25s ease;
+}
+
+/* Modal header */
+
+.borrow-modal-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.borrow-modal-icon {
+    width: 55px;
+    height: 55px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    border-radius: 50%;
+    font-size: 26px;
+}
+
+.borrow-modal-header h2 {
+    margin: 0 0 8px;
+    color: #1e293b;
+    font-size: 25px;
+}
+
+.borrow-modal-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Close button */
+
+.borrow-modal-close {
+    position: absolute;
+    top: 13px;
+    right: 17px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.borrow-modal-close:hover {
+    color: #ef4444;
+}
+
+/* Form fields */
+
+.borrow-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.borrow-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.borrow-form-group label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.borrow-form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.borrow-form-group input:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+.borrow-confirm-button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 9px;
+    background: #2563eb;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.borrow-confirm-button:hover {
+    background: #1d4ed8;
+}
+
+.borrow-confirm-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+.borrow-cancel-button {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: white;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.borrow-cancel-button:hover {
+    background: #f1f5f9;
+}
+
+
+.borrow-modal-error {
+    margin: 0;
+    padding: 11px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 13px;
+}
+
+
+@keyframes borrowModalShow {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@media (max-width: 480px) {
+    .borrow-modal {
+        padding: 25px 20px;
+    }
+}
+
+
+
+
 
 @media (max-width: 600px) {
     .history-modal {

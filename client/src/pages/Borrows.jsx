@@ -135,12 +135,7 @@ function Borrows() {
             ) : (
                 <div className="books-grid">
                     {books.map((book) => {
-                        const activeBorrow = borrows.find(
-                            (borrow) =>
-                                borrow.book?._id === book._id &&
-                                ["borrowed", "overdue"].includes(borrow.status),
-                        );
-
+                        const activeBorrow = !isAdmin ? borrows.find((borrow) =>borrow.book?._id === book._id &&["borrowed", "overdue"].includes(borrow.status),)  : null;
                         return (
                         <div className="book-card" key={book._id}>
                             <h2>{book.title}</h2>
@@ -162,7 +157,7 @@ function Borrows() {
                                 </button>
                             )}
                             {!activeBorrow && book.quantity > 0 && (
-                                <Borrow book={book} onBorrowed={handleBorrowed} />
+                                <Borrow book={book} onBorrowed={handleBorrowed} isAdmin={isAdmin} />
                             )}
                         </div>
                         );
