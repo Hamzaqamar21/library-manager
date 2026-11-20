@@ -1,4 +1,5 @@
 import { Routes, Route , Navigate} from "react-router-dom";
+import { useAuth } from "./context/AuthContext.jsx";
 
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -12,6 +13,8 @@ import Forbidden from "./pages/Forbidden.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
+    const { user } = useAuth();
+
     return (
         // <Routes>
         //   <Route path="/" element={<Navigate to="/login" replace />} />
@@ -47,7 +50,7 @@ function App() {
             <Route path="/books"
                 element={
                     <ProtectedRoute allowedRoles={["admin", "student"]}>
-                        <Books />
+                        {user?.role === "student" ? <Borrows /> : <Books />}
                     </ProtectedRoute>
                 }  />
 
@@ -61,7 +64,7 @@ function App() {
 
             <Route  path="/borrows"
                 element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
+                    <ProtectedRoute allowedRoles={["admin", "student"]}>
                         <Borrows />
                     </ProtectedRoute>
                 }/>

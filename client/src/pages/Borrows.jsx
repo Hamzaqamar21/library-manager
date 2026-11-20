@@ -3,8 +3,11 @@ import { getBooks } from "../api/bookApi.js";
 import { getBorrows, returnBook } from "../api/borrowApi.js";
 import Borrow from "../components/Borrow.jsx";
 import Navbar from "../components/Navbar.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function Borrows() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "admin";
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -121,9 +124,11 @@ function Borrows() {
             <h1>Borrow books</h1>
             <p>Select a book and enter its due date to borrow it.</p>
 
-            <button type="button" className="search-history-button" onClick={()=>setShowHistory(true)}>
-                Search History
-            </button>
+            {isAdmin && (
+                <button type="button" className="search-history-button" onClick={() => setShowHistory(true)}>
+                    Search History
+                </button>
+            )}
 
             {books.length === 0 ? (
                 <h3>No books available yet.</h3>
@@ -186,7 +191,7 @@ function Borrows() {
             )}
 
 
-            {showHistory && (
+            {isAdmin && showHistory && (
                 <div className="history-overlay">
                     <div className="history-modal">
                         <button type="button" className="history-close" onClick={() => setShowHistory(false)}>

@@ -27,7 +27,7 @@ function Navbar() {
                     </NavLink>
                 )}
                 <NavLink className={navLinkClass} to="/books">
-                    Books
+                    {isAdmin ? "Books" : "Borrow books"}
                 </NavLink>
                 {isAdmin && (
                     <>

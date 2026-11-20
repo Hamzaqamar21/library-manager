@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi.js";
 import BookForm from "../components/BookForm.jsx";
-import Borrow from "../components/Borrow.jsx";same 
 import { useAuth } from "../context/AuthContext.jsx";
 import {useSearchParams} from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
@@ -139,10 +138,7 @@ function Books() {
                             &times;
                          </button>
 
-                         <BookForm onBookCreated={(newBook) => {
-                                    setBooks((previousBooks) => [newBook, ...previousBooks]);
-                                    setShowBookForm(false);}}
-                            />
+                         <BookForm onBookCreated={(newBook) => { setBooks((previousBooks) => [newBook, ...previousBooks]);setShowBookForm(false);}} />
                         </div>
                     </div>
                 )}
@@ -205,20 +201,6 @@ function Books() {
                                 <strong>Status:</strong>{" "}
                                 {book.quantity > 0 ? "Available" : "Out of stock"}
                             </p>
-                            {isAdmin && book.quantity > 0 && (
-                                <Borrow
-                                    book={book}
-                                    onBorrowed={(bookId) => {
-                                        setBooks((previousBooks) =>
-                                            previousBooks.map((currentBook) =>
-                                                currentBook._id === bookId
-                                                    ? { ...currentBook, quantity: currentBook.quantity - 1 }
-                                                    : currentBook,
-                                            ),
-                                        );
-                                    }}
-                                />
-                            )}
                         </div>
 
                     ))}
