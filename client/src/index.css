@@ -156,11 +156,13 @@
 .books-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-top: 25px;
+    gap: 25px;
 }
 
 .book-card {
+
+    display: flex;
+    flex-direction: column;
     padding: 20px;
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -171,6 +173,11 @@
 .book-card h2 {
     font-size: 20px;
     margin-bottom: 15px;
+}
+
+.book-card .borrow-open-button,
+.book-card .return-book-button {
+    margin-top: auto;
 }
 
 .book-card p {
