@@ -3,14 +3,20 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
+import {useDispatch} from 'react-redux';
+import {loginSuccess} from '../app/features/auth/authSlice.js';
+import {signupUser} from '../app/features/auth/authActions.js';
+
 function Signup() {
 
-    const { signup } = useAuth();
+    // const { signup } = useAuth();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -21,7 +27,8 @@ function Signup() {
             setLoading(true);
             setError("");
 
-            const data = await signup({ name, email, password });
+            const data = await signupUser({ name, email, password });
+            dispatch(loginSuccess(data));
             navigate(data.user.role === "admin" ? "/dashboard" : "/books");
 
         } catch (error) {
