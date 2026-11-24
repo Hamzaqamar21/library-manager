@@ -1,13 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
+import { useSelector,useDispatch } from "react-redux";
+import { logout } from "../app/features/auth/authActions.js";
+
 function Navbar() {
-    const { user, logout } = useAuth();
+    // const { user, logout } = useAuth();
+    const dispatch = useDispatch();
+    const { user } = useSelector((state) => state.auth);
+    
     const navigate = useNavigate();
     const isAdmin = user?.role === "admin";
 
     const handleLogout = () => {
-        logout();
+        // logout();
+        dispatch(logout());
         navigate("/login");
     };
 
