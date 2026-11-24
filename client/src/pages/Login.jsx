@@ -2,9 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
+import {useDispatch} from 'react-redux';
+import {loginSuccess} from '../app/features/auth/authSlice.js';
+import {loginUser} from '../app/features/auth/authActions.js';
+
 function Login() {
 
-    const { login } = useAuth();
+    // const { login } = useAuth();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -20,7 +25,8 @@ function Login() {
             setLoading(true);
             setError("");
 
-            const data = await login({ email, password });
+            const data = await loginUser({ email, password });
+            dispatch(loginSuccess(data));
 
             if (data.user.role === "admin") {
                 navigate("/dashboard");
