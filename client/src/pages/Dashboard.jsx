@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+// import { useAuth } from "../context/AuthContext.jsx";
+import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar.jsx";
 
 function Dashboard() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
 
   return (
     <div className="dashboard-page">

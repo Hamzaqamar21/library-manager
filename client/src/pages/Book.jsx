@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi.js";
 import BookForm from "../components/BookForm.jsx";
-import { useAuth } from "../context/AuthContext.jsx";
+// import { useAuth } from "../context/AuthContext.jsx";
+import { useSelector } from "react-redux";
 import {useSearchParams} from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 
 function Books() {
-    const { user } = useAuth();
+    // const { user } = useAuth();
+    const { user } = useSelector((state) => state.auth);
     const isAdmin = user?.role === "admin";
 
     const [books, setBooks] = useState([]);

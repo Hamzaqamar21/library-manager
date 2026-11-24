@@ -1,8 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
 
 import { useSelector,useDispatch } from "react-redux";
-import { logout } from "../app/features/auth/authActions.js";
+import { logoutThunk } from "../features/auth/authSlice.js";
 
 function Navbar() {
     // const { user, logout } = useAuth();
@@ -14,7 +13,7 @@ function Navbar() {
 
     const handleLogout = () => {
         // logout();
-        dispatch(logout());
+        dispatch(logoutThunk());
         navigate("/login");
     };
 

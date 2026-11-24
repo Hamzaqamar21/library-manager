@@ -1,42 +1,32 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
 
-import {useDispatch} from 'react-redux';
-import {loginSuccess} from '../app/features/auth/authSlice.js';
-import {signupUser} from '../app/features/auth/authActions.js';
+import {useDispatch,useSelector} from "react-redux";
+import {signupThunk} from "../features/auth/authSlice.js";
 
 function Signup() {
 
     // const { signup } = useAuth();
     const dispatch = useDispatch();
+    const { loading, error } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            setLoading(true);
-            setError("");
-
-            const data = await signupUser({ name, email, password });
-            dispatch(loginSuccess(data));
+            const data = await dispatch(signupThunk({ name, email, password })).unwrap();
             navigate(data.user.role === "admin" ? "/dashboard" : "/books");
 
         } catch (error) {
-            setError(
-                error.response?.data?.message || "Signup failed. Please try again."
-            );
-        } finally {
-            setLoading(false);
+          console.error("Signup failed:", error);
         }
     };
 

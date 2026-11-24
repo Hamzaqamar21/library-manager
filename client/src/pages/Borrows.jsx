@@ -3,10 +3,12 @@ import { getBooks } from "../api/bookApi.js";
 import { getBorrows, returnBook } from "../api/borrowApi.js";
 import Borrow from "../components/Borrow.jsx";
 import Navbar from "../components/Navbar.jsx";
-import { useAuth } from "../context/AuthContext.jsx";
+// import { useAuth } from "../context/AuthContext.jsx";
+import { useSelector } from "react-redux";
 
 function Borrows() {
-    const { user } = useAuth();
+    // const { user } = useAuth();
+    const { user } = useSelector((state) => state.auth);
     const isAdmin = user?.role === "admin";
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);

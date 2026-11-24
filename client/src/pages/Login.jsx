@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
 
-import {useDispatch} from 'react-redux';
-import {loginSuccess} from '../app/features/auth/authSlice.js';
-import {loginUser} from '../app/features/auth/authActions.js';
+import { useDispatch,useSelector } from "react-redux";
+import { loginThunk } from "../features/auth/authSlice.js";
 
 function Login() {
 
@@ -14,19 +12,14 @@ function Login() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { loading, error } = useSelector((state) => state.auth);
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            setLoading(true);
-            setError("");
-
-            const data = await loginUser({ email, password });
-            dispatch(loginSuccess(data));
+            const data = await dispatch(loginThunk({ email, password })).unwrap();
 
             if (data.user.role === "admin") {
                 navigate("/dashboard");
@@ -35,12 +28,8 @@ function Login() {
             }
 
         } catch (error) {
-            setError(
-                error.response?.data?.message || "Login failed. Please try again."
-            );
-        } finally {
-            setLoading(false);
-        }
+            console.error("Login failed:", error);
+        } 
     };
 
 
