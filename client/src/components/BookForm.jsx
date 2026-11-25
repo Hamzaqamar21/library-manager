@@ -3,16 +3,14 @@ import { useState , useEffect } from "react";
 // import { createBook } from "../api/bookApi.js";
 import { useDispatch, useSelector } from "react-redux";
 import {addBookThunk,clearBookError} from "../features/books/bookSlice.js";
-import {getAuthors} from "../api/authorApi.js";
+import {fetchAuthorsThunk} from "../features/authors/authorSlice.js";
 
 
 function BookForm({ onBookCreated }) {
 
-    const [authors, setAuthors] = useState([]);
-    const [loadingAuthors, setLoadingAuthors] = useState(true);
-    const [errorAuthors, setErrorAuthors] = useState("");
     const dispatch = useDispatch();
     const {mutationLoading, mutationError} = useSelector((state) => state.books);
+    const { authors, loading: loadingAuthors, error: errorAuthors } = useSelector((state) => state.authors);
     const [formData, setFormData] = useState({title: "", author: "",category: "", description: "", quantity: "", publishedYear: "" });
     // const [loading, setLoading] = useState(false);
     // const [error, setError] = useState("");
@@ -20,19 +18,8 @@ function BookForm({ onBookCreated }) {
     const[validationError,setValidationError] = useState("");
 
     useEffect(() => {
-        const fetchAuthors = async () => {
-            try{
-                const data = await getAuthors();
-                setAuthors(data.authors||[]);
-            }catch(error){
-                setErrorAuthors(error.response?.data?.message || "Failed to load authors");
-            }finally{
-                setLoadingAuthors(false);
-            }
-        };
-
-        fetchAuthors();
-    }, []);
+        dispatch(fetchAuthorsThunk());
+    }, [dispatch]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -98,7 +85,7 @@ function BookForm({ onBookCreated }) {
                     ))}
                 </select>           
                     
-                {/* {errorAuthors && <p style={{ color: "red" }}>{errorAuthors}</p>} */}
+                {errorAuthors && <p className="form-message form-error">{errorAuthors}</p>}
                 {(validationError || mutationError) && <p style={{ color: "red" }}>{validationError || mutationError}</p>}
                 {!loadingAuthors && !errorAuthors && authors.length === 0 && <p style={{ color: "red" }}>No authors available. Please add an author first.</p>}
 

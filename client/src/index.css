@@ -866,9 +866,27 @@
     cursor: not-allowed;
 }
 
-.pagination span {
+.pagination-page-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 600;
     color: #333;
+}
+
+.pagination-page-selector select {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    color: #333;
+    font: inherit;
+    cursor: pointer;
+}
+
+.pagination-page-selector select:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
 }
 
 

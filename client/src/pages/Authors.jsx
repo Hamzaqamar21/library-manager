@@ -1,36 +1,18 @@
 import { useEffect, useState } from "react";
-import { getAuthors } from "../api/authorApi.js";
+import { useDispatch, useSelector } from "react-redux";
 import AuthorForm from "../components/AuthorForm.jsx";
 import Navbar from "../components/Navbar.jsx";
+import { fetchAuthorsThunk } from "../features/authors/authorSlice.js";
 
 function Authors() {
-    const [authors, setAuthors] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
+    const dispatch = useDispatch();
+    const { authors, loading, error, totalPages } = useSelector((state) => state.authors);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-
     const [showAuthorForm, setShowAuthorForm] = useState(false);
 
     useEffect(() => {
-        const fetchAuthors = async () => {
-            try {
-                // const data = await getAuthors();
-                setLoading(true);
-                const data = await getAuthors({ page: currentPage });
-
-                setAuthors(data.authors);
-                setTotalPages(data.totalPages);
-            } catch (requestError) {
-                setError(requestError.response?.data?.message || "Failed to load authors");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchAuthors();
-    }, [currentPage]);
+        dispatch(fetchAuthorsThunk({ page: currentPage }));
+    }, [currentPage, dispatch]);
 
     return (
         <div className="library-page">
@@ -38,9 +20,6 @@ function Authors() {
             <main className="books-container">
             <h1>Library Authors</h1>
             <p>Add and view the authors in your library.</p>
-            {/* <AuthorForm onAuthorCreated={(newAuthor) => setAuthors((previous) => [newAuthor, ...previous])} /> */}
-
-
             <div className="add-book-section">
                 <button className="add-book-button" onClick={() => setShowAuthorForm(true)} >
                     + Add New Author
@@ -54,7 +33,7 @@ function Authors() {
                             &times;
                         </button>
 
-                        <AuthorForm onAuthorCreated={(newAuthor) => { setAuthors((previous) => [newAuthor, ...previous]); setShowAuthorForm(false); }}/>
+                        <AuthorForm onAuthorCreated={() => setShowAuthorForm(false)} />
                     </div>
                 </div>
             )}
@@ -85,11 +64,23 @@ function Authors() {
 
             {totalPages > 1 && (
                 <div className="pagination">
-                    <button onClick={() => setCurrentPage(prev => prev - 1, )} disabled={currentPage === 1}>
+                    <button onClick={() => setCurrentPage((previous) => previous - 1)} disabled={currentPage === 1}>
                         Previous
                     </button>
-                    <span>Page {currentPage} of {totalPages}</span>
-                    <button onClick={() => setCurrentPage(prev => prev + 1, totalPages)} disabled={currentPage === totalPages}>
+                    <label className="pagination-page-selector">
+                        Page
+                        <select
+                            aria-label="Select authors page"
+                            value={currentPage}
+                            onChange={(event) => setCurrentPage(Number(event.target.value))}
+                        >
+                            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                                <option key={page} value={page}>{page}</option>
+                            ))}
+                        </select>
+                        of {totalPages}
+                    </label>
+                    <button onClick={() => setCurrentPage((previous) => previous + 1)} disabled={currentPage === totalPages}>
                         Next
                     </button>
                 </div>

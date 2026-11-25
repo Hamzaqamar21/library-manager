@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { createAuthor } from "../api/authorApi.js";
+import { useDispatch, useSelector } from "react-redux";
+import { addAuthorThunk, clearAuthorError } from "../features/authors/authorSlice.js";
 
 function AuthorForm({ onAuthorCreated }) {
     const [formData, setFormData] = useState({name: "", bio: "", nationality: "", birthDate: "" });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    const dispatch = useDispatch();
+    const { mutationLoading: loading, mutationError: error } = useSelector((state) => state.authors);
     const [success, setSuccess] = useState("");
 
     const handleChange = (event) => {
@@ -15,23 +16,18 @@ function AuthorForm({ onAuthorCreated }) {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        try {
-            setLoading(true);
-            setError("");
-            setSuccess("");
+        dispatch(clearAuthorError());
+        setSuccess("");
 
-            const birthDate = formData.birthDate
-                ? formData.birthDate.replace(/^(\d{2})-(\d{2})-(\d{4})$/, "$3-$2-$1")
-                : null;
-            const data = await createAuthor({ ...formData, birthDate });
+        const birthDate = formData.birthDate
+            ? formData.birthDate.replace(/^(\d{2})-(\d{2})-(\d{4})$/, "$3-$2-$1")
+            : null;
+        const action = await dispatch(addAuthorThunk({ ...formData, birthDate }));
 
-            onAuthorCreated(data.author);
+        if (addAuthorThunk.fulfilled.match(action)) {
+            onAuthorCreated(action.payload.author || action.payload);
             setFormData({ name: "", bio: "", nationality: "", birthDate: "" });
             setSuccess("Author created successfully!");
-        } catch (requestError) {
-            setError(requestError.response?.data?.message || "Failed to create author");
-        } finally {
-            setLoading(false);
         }
     };
 

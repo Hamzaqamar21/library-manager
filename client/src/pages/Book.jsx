@@ -232,7 +232,19 @@ function Books() {
                     <button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>
                         Previous
                     </button>
-                    <span>Page {currentPage} of {totalPages}</span>
+                    <label className="pagination-page-selector">
+                        Page
+                        <select
+                            aria-label="Select books page"
+                            value={currentPage}
+                            onChange={(event) => setCurrentPage(Number(event.target.value))}
+                        >
+                            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                                <option key={page} value={page}>{page}</option>
+                            ))}
+                        </select>
+                        of {totalPages}
+                    </label>
                     <button onClick={() => setCurrentPage(prev => prev + 1)} disabled={currentPage === totalPages}>
                         Next
                     </button>

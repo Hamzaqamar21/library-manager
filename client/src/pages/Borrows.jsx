@@ -1,42 +1,50 @@
 import { useEffect, useState } from "react";
 import { getBooks } from "../api/bookApi.js";
-import { getBorrows, returnBook } from "../api/borrowApi.js";
 import Borrow from "../components/Borrow.jsx";
 import Navbar from "../components/Navbar.jsx";
 // import { useAuth } from "../context/AuthContext.jsx";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    fetchBorrowHistoryThunk,
+    fetchBorrowsThunk,
+    returnBorrowThunk,
+} from "../features/borrows/borrowSlice.js";
 
 function Borrows() {
     // const { user } = useAuth();
     const { user } = useSelector((state) => state.auth);
+    const {
+        borrows,
+        loading: borrowsLoading,
+        error: borrowsError,
+        mutationError,
+        historyRecords,
+        historyLoading,
+        historyError,
+        historyTotalPages,
+    } = useSelector((state) => state.borrows);
+    const dispatch = useDispatch();
     const isAdmin = user?.role === "admin";
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [borrows, setBorrows] = useState([]);
     const [returningId, setReturningId] = useState("");
     const [bookPage, setBookPage] = useState(1);
     const [bookTotalPages, setBookTotalPages] = useState(1);
 
     const [showHistory, setShowHistory] = useState(false);
     const [historyFilter, setHistoryFilter] = useState({ student: "", book: "", from: "", to: "" });
-    const [historyRecords, setHistoryRecords] = useState([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
-    const [historyError, setHistoryError] = useState("");
+    const [historyValidationError, setHistoryValidationError] = useState("");
     const [historySearched, setHistorySearched] = useState(false);
     const [historyPage, setHistoryPage] = useState(1);
-    const [historyTotalPages, setHistoryTotalPages] = useState(1);
 
     useEffect(() => {
+        dispatch(fetchBorrowsThunk());
         const fetchBooks = async () => {
             try {
-                const [booksData, borrowsData] = await Promise.all([
-                    getBooks({ page: bookPage }),
-                    getBorrows(),
-                ]);
+                const booksData = await getBooks({ page: bookPage });
                 setBooks(booksData.books || []);
                 setBookTotalPages(booksData.totalPages || 1);
-                setBorrows(borrowsData.borrows || []);
             } catch (requestError) {
                 setError(requestError.response?.data?.message || "Failed to load books");
             } finally {
@@ -45,60 +53,43 @@ function Borrows() {
         };
 
         fetchBooks();
-    }, [bookPage]);
+    }, [bookPage, dispatch]);
 
-    const handleBorrowed = (bookId, borrow) => {
+    const handleBorrowed = (bookId) => {
         setBooks((previousBooks) =>
             previousBooks.map((book) =>
                 book._id === bookId ? { ...book, quantity: book.quantity - 1 } : book,
             ),
         );
-        setBorrows((previousBorrows) => [...previousBorrows, borrow]);
     };
 
     const handleReturned = async (borrow) => {
         try {
             setReturningId(borrow._id);
-            await returnBook(borrow._id);
-            setBorrows((previousBorrows) =>
-                previousBorrows.map((currentBorrow) =>
-                    currentBorrow._id === borrow._id
-                        ? { ...currentBorrow, status: "returned", returnDate: new Date().toISOString() }
-                        : currentBorrow,
-                ),
-            );
-            setBooks((previousBooks) =>
-                previousBooks.map((book) =>
-                    book._id === borrow.book?._id
-                        ? { ...book, quantity: book.quantity + 1 }
-                        : book,
-                ),
-            );
-        } catch (requestError) {
-            setError(requestError.response?.data?.message || "Failed to return book");
+            const action = await dispatch(returnBorrowThunk(borrow._id));
+            if (returnBorrowThunk.fulfilled.match(action)) {
+                setBooks((previousBooks) =>
+                    previousBooks.map((book) =>
+                        book._id === borrow.book?._id
+                            ? { ...book, quantity: book.quantity + 1 }
+                            : book,
+                    ),
+                );
+            }
         } finally {
             setReturningId("");
         }
     };
     
-    const handleHistorySearch = async (event, page = historyPage) => {
+    const handleHistorySearch = (event, page = historyPage) => {
         event.preventDefault();
-        setHistoryError("");
+        setHistoryValidationError("");
         if(historyFilter.from && historyFilter.to && historyFilter.from > historyFilter.to){
-            setHistoryError("The 'From' date cannot be later than the 'To' date.");
+            setHistoryValidationError("The 'From' date cannot be later than the 'To' date.");
             return;
         }
-        try{
-            setHistoryLoading(true);
-            const data = await getBorrows({ ...historyFilter, page });
-            setHistoryRecords(data.borrows || []);
-            setHistoryTotalPages(data.totalPages || 1);
-            setHistorySearched(true);
-        } catch (error) {
-            setHistoryError(error.response?.data?.message || "Failed to fetch history");
-        } finally {
-            setHistoryLoading(false);
-        }
+        dispatch(fetchBorrowHistoryThunk({ ...historyFilter, page }));
+        setHistorySearched(true);
     }
 
     const handleHistoryFilterChange = (event) => {
@@ -111,12 +102,12 @@ function Borrows() {
         handleHistorySearch({ preventDefault: () => {} }, page);
     };
 
-    if (loading) {
+    if (loading || borrowsLoading) {
         return <div className="library-page"><Navbar /><main className="borrows-container"><h2>Loading books...</h2></main></div>;
     }
 
-    if (error) {
-        return <div className="library-page"><Navbar /><main className="borrows-container"><h2 className="form-error">{error}</h2></main></div>;
+    if (error || borrowsError) {
+        return <div className="library-page"><Navbar /><main className="borrows-container"><h2 className="form-error">{error || borrowsError}</h2></main></div>;
     }
 
     return (
@@ -125,6 +116,7 @@ function Borrows() {
             <main className="borrows-container">
             <h1>Borrow books</h1>
             <p>Select a book and enter its due date to borrow it.</p>
+            {mutationError && <p className="form-message form-error">{mutationError}</p>}
 
             {isAdmin && (
                 <button type="button" className="search-history-button" onClick={() => setShowHistory(true)}>
@@ -176,7 +168,19 @@ function Borrows() {
                     >
                         Previous
                     </button>
-                    <span>Page {bookPage} of {bookTotalPages}</span>
+                    <label className="pagination-page-selector">
+                        Page
+                        <select
+                            aria-label="Select books page"
+                            value={bookPage}
+                            onChange={(event) => setBookPage(Number(event.target.value))}
+                        >
+                            {Array.from({ length: bookTotalPages }, (_, index) => index + 1).map((page) => (
+                                <option key={page} value={page}>{page}</option>
+                            ))}
+                        </select>
+                        of {bookTotalPages}
+                    </label>
                     <button
                         type="button"
                         onClick={() => setBookPage((previous) => previous + 1)}
@@ -217,7 +221,7 @@ function Borrows() {
                                 </div>
                             </div>
 
-                            {historyError && <p className="form-message form-error">{historyError}</p>}
+                            {(historyValidationError || historyError) && <p className="form-message form-error">{historyValidationError || historyError}</p>}
                             <button type="submit" disabled={historyLoading}>
                                 {historyLoading ? "Searching..." : "Search History"}
                             </button>
@@ -291,7 +295,20 @@ function Borrows() {
                                         >
                                             Previous
                                         </button>
-                                        <span>Page {historyPage} of {historyTotalPages}</span>
+                                        <label className="pagination-page-selector">
+                                            Page
+                                            <select
+                                                aria-label="Select borrowing history page"
+                                                value={historyPage}
+                                                onChange={(event) => handleHistoryPageChange(Number(event.target.value))}
+                                                disabled={historyLoading}
+                                            >
+                                                {Array.from({ length: historyTotalPages }, (_, index) => index + 1).map((page) => (
+                                                    <option key={page} value={page}>{page}</option>
+                                                ))}
+                                            </select>
+                                            of {historyTotalPages}
+                                        </label>
                                         <button
                                             type="button"
                                             onClick={() => handleHistoryPageChange(historyPage + 1)}

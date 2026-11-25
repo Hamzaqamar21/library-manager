@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { borrowBook } from "../api/borrowApi.js";
+import { useDispatch, useSelector } from "react-redux";
+import { addBorrowThunk, clearBorrowError } from "../features/borrows/borrowSlice.js";
 
 function Borrow({ book, onBorrowed  }) {
 
+    const dispatch = useDispatch();
+    const { mutationLoading: loading, mutationError } = useSelector((state) => state.borrows);
     const [showModal , setShowModal] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
 
     const [dueDate, setDueDate] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [validationError, setValidationError] = useState("");
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -17,36 +19,23 @@ function Borrow({ book, onBorrowed  }) {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setError("");
-
-       // const parsedDate = new Date(dueDate);
-        // if (!dueDate || Number.isNaN(parsedDate.getTime()) || parsedDate <= new Date()) {
-        //     setError("Enter a valid future due date, for example 2026-12-31.");
-        //     return;
-        // }
-        // const today = new Date();
-        // today.setHours(0, 0, 0, 0);
+        setValidationError("");
+        dispatch(clearBorrowError());
 
         const selectedDate = new Date(`${dueDate}T00:00:00`);
-        const todayDate = new Date(`${minDate}T00:00:00`);
-
         if (!dueDate || Number.isNaN(selectedDate.getTime()) || selectedDate <= today) {
-            setError("Please select a future due date.");
+            setValidationError("Please select a future due date.");
             return;
         }
-        try {
-            setLoading(true);
-            const borrowData = {book: book._id,name:name.trim(), email:email.trim(), dueDate };
-            const response = await borrowBook(borrowData);
-            onBorrowed(book._id, response.borrow);
+
+        const borrowData = { book: book._id, name: name.trim(), email: email.trim(), dueDate };
+        const action = await dispatch(addBorrowThunk(borrowData));
+        if (addBorrowThunk.fulfilled.match(action)) {
+            onBorrowed(book._id, action.payload.borrow || action.payload);
             setName("");
             setEmail("");
             setDueDate("");
             setShowModal(false);
-        } catch (requestError) {
-            setError(requestError.response?.data?.message || "Unable to borrow this book.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -66,7 +55,7 @@ function Borrow({ book, onBorrowed  }) {
         // </form>
 
         <>
-            <button type="button" className="borrow-open-button" onClick={() => { setError(""); setShowModal(true); }} disabled={book.quantity < 1}  >
+            <button type="button" className="borrow-open-button" onClick={() => { setValidationError(""); dispatch(clearBorrowError()); setShowModal(true); }} disabled={book.quantity < 1}  >
                 Borrow Book
             </button>
 
@@ -110,7 +99,7 @@ function Borrow({ book, onBorrowed  }) {
                                 <input id={`borrow-date-${book._id}`} type="date" value={dueDate} min={minDate} onChange={(e) => setDueDate(e.target.value)} required disabled={loading} />
                             </div>
 
-                            {error && (<p className="borrow-modal-error">{error}</p>  )}
+                            {(validationError || mutationError) && (<p className="borrow-modal-error">{validationError || mutationError}</p>)}
 
                             <button type="submit" className="borrow-confirm-button" disabled={loading} >
                                 {loading ? "Processing..." : "Confirm Borrow"}
