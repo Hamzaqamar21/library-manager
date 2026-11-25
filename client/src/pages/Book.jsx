@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { getBooks } from "../api/bookApi.js";
+// import { getBooks } from "../api/bookApi.js";
+import {useDispatch,useSelector} from "react-redux";
+import { fetchBooksThunk } from "../features/books/bookSlice.js";
 import BookForm from "../components/BookForm.jsx";
 // import { useAuth } from "../context/AuthContext.jsx";
-import { useSelector } from "react-redux";
 import {useSearchParams} from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 
@@ -11,11 +12,11 @@ function Books() {
     const { user } = useSelector((state) => state.auth);
     const isAdmin = user?.role === "admin";
 
-    const [books, setBooks] = useState([]);
+    // const [books, setBooks] = useState([]);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [categories, setCategories] = useState([]);
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const [totalPages, setTotalPages] = useState(1);
+    // const [categories, setCategories] = useState([]);
 
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -23,33 +24,44 @@ function Books() {
     const categoryFilter=searchParams.get("category") || "";
     const availabilityFilter=searchParams.get("availability") || "all";
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState("");
+    const {books,categories,totalPages,loading,error} = useSelector((state) => state.books);
+    const  [currentPage, setCurrentPage] = useState(1);
+    const dispatch = useDispatch();
+
+    // const [showBookForm, setShowBookForm] = useState(false);
 
     const [showBookForm, setShowBookForm] = useState(false);
 
 
+    // useEffect(() => {
+
+        
+    //     const fetchBooks = async () => {
+    //         try {
+    //             setLoading(true);
+    //             setError("");
+    //             const data = await getBooks({page:currentPage, search: searchTerm, category: categoryFilter, availability: availabilityFilter});
+    //             setBooks(data.books || []);
+    //             setTotalPages(data.totalPages||1);
+    //             setCategories(data.categories||[]);
+
+    //         } catch (error) {
+    //             setError( error.response?.data?.message || "Failed to load books"  );
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchBooks();
+
+    // }, [currentPage, searchTerm, categoryFilter, availabilityFilter]);
+
     useEffect(() => {
+        dispatch(fetchBooksThunk({page:currentPage, search: searchTerm, category: categoryFilter, availability: availabilityFilter}));      
 
-        const fetchBooks = async () => {
-            try {
-                setLoading(true);
-                setError("");
-                const data = await getBooks({page:currentPage, search: searchTerm, category: categoryFilter, availability: availabilityFilter});
-                setBooks(data.books || []);
-                setTotalPages(data.totalPages||1);
-                setCategories(data.categories||[]);
-
-            } catch (error) {
-                setError( error.response?.data?.message || "Failed to load books"  );
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBooks();
-
-    }, [currentPage, searchTerm, categoryFilter, availabilityFilter]);
+    },[dispatch, currentPage, searchTerm, categoryFilter, availabilityFilter]);
 
     const handleSearchChange = (value) => {
         setCurrentPage(1);
@@ -221,7 +233,7 @@ function Books() {
                         Previous
                     </button>
                     <span>Page {currentPage} of {totalPages}</span>
-                    <button onClick={() => setCurrentPage(prev => prev + 1, totalPages)} disabled={currentPage === totalPages}>
+                    <button onClick={() => setCurrentPage(prev => prev + 1)} disabled={currentPage === totalPages}>
                         Next
                     </button>
                 </div>

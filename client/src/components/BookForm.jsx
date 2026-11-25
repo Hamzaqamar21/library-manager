@@ -1,6 +1,8 @@
 
 import { useState , useEffect } from "react";
-import { createBook } from "../api/bookApi.js";
+// import { createBook } from "../api/bookApi.js";
+import { useDispatch, useSelector } from "react-redux";
+import {addBookThunk,clearBookError} from "../features/books/bookSlice.js";
 import {getAuthors} from "../api/authorApi.js";
 
 
@@ -9,11 +11,13 @@ function BookForm({ onBookCreated }) {
     const [authors, setAuthors] = useState([]);
     const [loadingAuthors, setLoadingAuthors] = useState(true);
     const [errorAuthors, setErrorAuthors] = useState("");
-
+    const dispatch = useDispatch();
+    const {mutationLoading, mutationError} = useSelector((state) => state.books);
     const [formData, setFormData] = useState({title: "", author: "",category: "", description: "", quantity: "", publishedYear: "" });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    // const [loading, setLoading] = useState(false);
+    // const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const[validationError,setValidationError] = useState("");
 
     useEffect(() => {
         const fetchAuthors = async () => {
@@ -40,38 +44,39 @@ function BookForm({ onBookCreated }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        setValidationError("");
+        dispatch(clearBookError());
+
         if (formData.quantity === "" || Number(formData.quantity) < 0 ||
             !Number.isInteger(Number(formData.quantity))) {
-            setError("Quantity cannot be negative. Please enter a valid whole number.");
+            setValidationError("Quantity cannot be negative. Please enter a valid whole number.");
             return;
         }
 
         const currentYear = new Date().getFullYear();
         if (formData.publishedYear && Number(formData.publishedYear) > currentYear) {
-            setError(`Published year must be between 1000 and ${currentYear}.`);
+            setValidationError(`Published year must be between 1000 and ${currentYear}.`);
             return;
         }
 
         try {
-            setLoading(true);
-            setError("");
+            // setLoading(true);
+            // setError("");
             setSuccess("");
 
             const bookData = {
                 ...formData,
                 quantity: Number(formData.quantity), publishedYear: formData.publishedYear ? Number(formData.publishedYear): null };
 
-            const data = await createBook(bookData);
+            const data = await dispatch(addBookThunk(bookData)).unwrap();
             onBookCreated(data.book);
             setFormData({ title: "", author: "", category: "", description: "", quantity: "", publishedYear: "" });
 
             setSuccess("Book created successfully!");
 
         } catch (error) {
-            setError( error.response?.data?.message || "Failed to create book" );
-        } finally {
-            setLoading(false);
-        }
+            console.error("Failed to create book:", error);
+        } 
     };
 
     return (
@@ -93,7 +98,8 @@ function BookForm({ onBookCreated }) {
                     ))}
                 </select>           
                     
-                {errorAuthors && <p style={{ color: "red" }}>{errorAuthors}</p>}
+                {/* {errorAuthors && <p style={{ color: "red" }}>{errorAuthors}</p>} */}
+                {(validationError || mutationError) && <p style={{ color: "red" }}>{validationError || mutationError}</p>}
                 {!loadingAuthors && !errorAuthors && authors.length === 0 && <p style={{ color: "red" }}>No authors available. Please add an author first.</p>}
 
 
@@ -112,10 +118,11 @@ function BookForm({ onBookCreated }) {
                 <label>Published Year</label>
                 <input type="number" name="publishedYear" value={formData.publishedYear} onChange={handleChange} min="1000" max={new Date().getFullYear()} placeholder="Example: 2020" />
 
-                {error && <p style={{ color: "red" }}>{error}</p>}
+                {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
+                {(validationError || mutationError) && <p style={{ color: "red" }}>{validationError || mutationError}</p>}
                 {success && <p style={{ color: "green" }}>{success}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? "Adding Book..." : "Add Book"}
+                <button type="submit" disabled={mutationLoading}>
+                    {mutationLoading ? "Adding Book..." : "Add Book"}
                 </button>
 
             </form>
