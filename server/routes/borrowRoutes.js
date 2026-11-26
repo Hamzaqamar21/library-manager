@@ -5,6 +5,7 @@ import Book from "../models/Book.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import adminMiddleware from "../middleware/adminMiddleware.js";
 import User from "../models/User.js";
+import {sendBorrowEmail} from "../config/mailer.js";
 
 const router = express.Router();
 
@@ -90,11 +91,17 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
     try {
-        const { book, dueDate ,name,email} = req.body;
+        const { book, dueDate, name, email } = req.body;
 
-        if (!book || !dueDate||!email?.trim()||!name?.trim()) {
+        if (!book || !dueDate) {
             return res.status(400).json({
-                message: "Book ,name , email and due date are required"
+                message: "Book and due date are required"
+            });
+        }
+
+        if (req.user.role === "admin" && (!email?.trim() || !name?.trim())) {
+            return res.status(400).json({
+                message: "Student name and email are required"
             });
         }
 
@@ -117,7 +124,7 @@ router.post("/", async (req, res) => {
 
         }else {borrower = req.user;}
 
-        if(borrower.name.trim().toLowerCase() !== name.trim().toLowerCase()){
+        if(req.user.role === "admin" && borrower.name.trim().toLowerCase() !== name.trim().toLowerCase()){
                 return res.status(400).json({ message: "Name does not match the email provided" });
         }
         
@@ -144,8 +151,15 @@ router.post("/", async (req, res) => {
         await bookExists.save();
 
         const populatedBorrow = await Borrow.findById(borrow._id).populate("user", "name email").populate("book", "title category");
+        let emailSent = false;
+        try {
+            await sendBorrowEmail(populatedBorrow);
+            emailSent = true;
+        } catch (emailError) {
+            console.error("Error sending borrow email:", emailError.message);
+        }
 
-        res.status(201).json({message: "Book borrowed successfully",borrow: populatedBorrow});
+        res.status(201).json({message: "Book borrowed successfully",borrow: populatedBorrow,emailSent });
     } catch (error) {
         console.error("Borrow book error:", error);
         res.status(500).json({ message: "Server error" });

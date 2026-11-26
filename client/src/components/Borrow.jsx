@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addBorrowThunk, clearBorrowError } from "../features/borrows/borrowSlice.js";
 
-function Borrow({ book, onBorrowed  }) {
+function Borrow({ book, onBorrowed, isAdmin }) {
 
     const dispatch = useDispatch();
     const { mutationLoading: loading, mutationError } = useSelector((state) => state.borrows);
@@ -12,6 +12,8 @@ function Borrow({ book, onBorrowed  }) {
 
     const [dueDate, setDueDate] = useState("");
     const [validationError, setValidationError] = useState("");
+    const [emailNotice, setEmailNotice] = useState("");
+    const [emailPreviewUrl, setEmailPreviewUrl] = useState("");
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -20,6 +22,8 @@ function Borrow({ book, onBorrowed  }) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setValidationError("");
+        setEmailNotice("");
+        setEmailPreviewUrl("");
         dispatch(clearBorrowError());
 
         const selectedDate = new Date(`${dueDate}T00:00:00`);
@@ -28,10 +32,21 @@ function Borrow({ book, onBorrowed  }) {
             return;
         }
 
-        const borrowData = { book: book._id, name: name.trim(), email: email.trim(), dueDate };
+        const borrowData = { book: book._id, dueDate };
+        if (isAdmin) {
+            borrowData.name = name.trim();
+            borrowData.email = email.trim();
+        }
+
         const action = await dispatch(addBorrowThunk(borrowData));
         if (addBorrowThunk.fulfilled.match(action)) {
             onBorrowed(book._id, action.payload.borrow || action.payload);
+            setEmailNotice(action.payload.emailSent
+                ? action.payload.emailPreviewUrl
+                    ? "Ethereal test preview (not delivered to the student's inbox):"
+                    : "Test email captured by the local mail server (not delivered to an inbox)."
+                : "Book borrowed, but the confirmation email could not be sent. Please contact library staff.");
+            setEmailPreviewUrl(action.payload.emailPreviewUrl || "");
             setName("");
             setEmail("");
             setDueDate("");
@@ -55,7 +70,13 @@ function Borrow({ book, onBorrowed  }) {
         // </form>
 
         <>
-            <button type="button" className="borrow-open-button" onClick={() => { setValidationError(""); dispatch(clearBorrowError()); setShowModal(true); }} disabled={book.quantity < 1}  >
+            {emailNotice && (
+                <p role="status">
+                    {emailNotice}{" "}
+                    {emailPreviewUrl && <a href={emailPreviewUrl} target="_blank" rel="noreferrer">View preview</a>}
+                </p>
+            )}
+            <button type="button" className="borrow-open-button" onClick={() => { setValidationError(""); setEmailNotice(""); setEmailPreviewUrl(""); dispatch(clearBorrowError()); setShowModal(true); }} disabled={book.quantity < 1}  >
                 Borrow Book
             </button>
 
@@ -69,27 +90,31 @@ function Borrow({ book, onBorrowed  }) {
                         <div className="borrow-modal-header">
                             <h2>Borrow Book</h2>
                             <p>
-                                Enter your details to borrow this book.
+                                {isAdmin ? "Enter the student's details to borrow this book." : "Choose a due date to borrow this book."}
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmit}>
 
-                            <div className="borrow-form-group">
-                                <label htmlFor={`borrow-name-${book._id}`}>
-                                    Student Name
-                                </label>
+                            {isAdmin && (
+                                <>
+                                    <div className="borrow-form-group">
+                                        <label htmlFor={`borrow-name-${book._id}`}>
+                                            Student Name
+                                        </label>
 
-                                <input id={`borrow-name-${book._id}`} type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" required disabled={loading}  />
-                            </div>
+                                        <input id={`borrow-name-${book._id}`} type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter the student's full name" required disabled={loading} />
+                                    </div>
 
-                            <div className="borrow-form-group">
-                                <label htmlFor={`borrow-email-${book._id}`}>
-                                    Email Address
-                                </label>
+                                    <div className="borrow-form-group">
+                                        <label htmlFor={`borrow-email-${book._id}`}>
+                                            Email Address
+                                        </label>
 
-                                <input id={`borrow-email-${book._id}`} type="email" value={email} onChange={(e) => setEmail(e.target.value)}placeholder="Enter your email" required disabled={loading}  />
-                            </div>
+                                        <input id={`borrow-email-${book._id}`} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter the student's email" required disabled={loading} />
+                                    </div>
+                                </>
+                            )}
 
                             <div className="borrow-form-group">
                                 <label htmlFor={`borrow-date-${book._id}`}>
