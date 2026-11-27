@@ -48,6 +48,10 @@ function Login() {
                     <label>Password</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required  />
 
+                    <div className="forgot-password-link">
+                        <Link to="/forgot-password">Forgot Password?</Link>
+                    </div>
+
                     {error && (
                         <p className="auth-error">{error}</p>
                     )}

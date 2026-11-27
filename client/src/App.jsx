@@ -13,6 +13,9 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import { useSelector } from "react-redux";
 
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
+
 function App() {
     // const { user } = useAuth();
     const { user } = useSelector((state) => state.auth);
@@ -41,6 +44,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
+
+            <Route path="/forgot-password" element={<ForgotPassword />}/>
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             <Route path="/dashboard"
                 element={
